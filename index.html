@@ -6,7 +6,7 @@
       content="initial-scale=1,maximum-scale=1,user-scalable=no"
     />
     <title>
-      Load a basic WebMap | Sample | ArcGIS Maps SDK for JavaScript 4.27
+      Galiano Grow House
     </title>
 
     <style>
@@ -32,8 +32,9 @@
       require([
         "esri/views/MapView", 
         "esri/WebMap",
+        "esri/widgets/Expand",
         "esri/widgets/Editor"],
-         (MapView, WebMap, Editor) => {
+         (MapView, WebMap, Expand, Editor) => {
 
         const webmap = new WebMap({
           portalItem: {
@@ -47,11 +48,19 @@
           container: "viewDiv"
         });
 
+        const editor = new Editor({
+            view: view
+        });
+
+        const layerListExpand = new Expand({
+            expandIcon: "edit-attributes",
+            expandTooltip: "Editor",
+            view: view,
+            content: editor
+        });
+
         view.when(() => {
-            const editor = new Editor({
-                view: view
-            });
-            view.ui.add(editor, "top-right");
+            view.ui.add(layerListExpand, "top-right");
         });
         
       });
