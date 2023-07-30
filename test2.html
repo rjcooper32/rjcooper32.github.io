@@ -1,0 +1,145 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>
+      Galiano Grow House
+    </title>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.27/esri/themes/light/main.css"
+    />
+
+    <script src="https://js.arcgis.com/4.27/"></script>
+
+    <script>
+
+      require([
+        "esri/views/MapView", 
+        "esri/WebMap",
+        "esri/Graphic",
+        "esri/widgets/Expand",
+        "esri/widgets/Editor",
+        "esri/widgets/Locate"],
+         (MapView, WebMap, Graphic, Expand, Editor, Locate) => {
+
+        const webmap = new WebMap({
+          portalItem: {
+            // autocasts as new PortalItem()
+            id: "8f16be75c78e4771998ddfaf0790272e"
+          }
+        });
+
+        const view = new MapView({
+          map: webmap,
+          container: "viewDiv"
+        });
+
+        const editThisAction = {
+          title: "Edit feature",
+          id: "edit-this",
+          className: "esri-icon-edit"
+        };
+
+        const editor = new Editor({
+            view: view
+        });
+
+        const layerListExpand = new Expand({
+            expandIcon: "edit-attributes",
+            expandTooltip: "Editor",
+            view: view,
+            content: editor
+        });
+
+
+        const locateWidget = new Locate({
+            view: view,
+            graphic: new Graphic({
+                symbol: { type: "simple-marker" }
+            })
+        });
+
+
+
+        view.when(() => {
+            //view.ui.add(layerListExpand, "top-right");
+            view.ui.add(locateWidget, "top-left");
+
+            editor = new Editor({
+                view: view;
+                visibleElements: {snappingControls: false},
+                container: document.createElement("div"),
+                layerInfos: [
+                    {
+                        layer: featureLayer,
+                        formTemplate: {
+                            elements: [
+                                {
+                                    type: "field",
+                                    fieldName: "class",
+                                    label: "Class",
+                                    editableExpression: false
+                                },
+                                {
+                                    type: "field",
+                                    fieldName: "startDate",
+                                    label: "Start Date",
+                                    hint: "When was this planted"
+                                }
+                            ]
+                        }
+                    }
+                    
+
+                ]
+            });
+
+            function editThis() {
+                if (!editor.activeWorkflow) {
+                    view.popup.visible = false;
+                    editor.startUpdateWorkflowAtFeatureEdit(
+                        view.popup.selectedFeature
+                    )
+                    view.ui.add(editor, "top-right")
+                }
+            }
+
+            reactiveUtils.on(
+                () => view.popup,
+                "trigger-action",
+                (event) => {
+                    if (event.action.id === "edit-this") {
+                        editThis();
+                    }
+                }
+            )
+
+        });
+
+      });
+
+
+
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>

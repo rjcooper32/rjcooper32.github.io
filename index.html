@@ -8,7 +8,7 @@
     <title>
       Galiano Grow House
     </title>
-
+    <link rel="icon" type="image/x-icon" href="/Users/ryancooper/Documents/GitHub/rjcooper32.github.io/favicon.ico">
     <style>
       html,
       body,
@@ -22,51 +22,44 @@
 
     <link
       rel="stylesheet"
-      href="https://js.arcgis.com/4.27/esri/themes/light/main.css"
+      href="https://js.arcgis.com/4.26/esri/themes/light/main.css"
     />
-
-    <script src="https://js.arcgis.com/4.27/"></script>
+    <script src="https://js.arcgis.com/4.26/"></script>
 
     <script>
-
       require([
-        "esri/views/MapView", 
-        "esri/WebMap",
-        "esri/widgets/Expand",
-        "esri/widgets/Editor"],
-         (MapView, WebMap, Expand, Editor) => {
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/widgets/Track"
+      ], (Map, MapView, Track) => {
 
-        const webmap = new WebMap({
-          portalItem: {
-            // autocasts as new PortalItem()
-            id: "8f16be75c78e4771998ddfaf0790272e"
-          }
+        const map = new Map({
+          basemap: "hybrid"
         });
 
         const view = new MapView({
-          map: webmap,
-          container: "viewDiv"
+          container: "viewDiv",
+          map: map,
+          zoom: 18,
+          center: [-123.3274, 48.8735],
+          constraints: {
+            snapToZoom: false
+          }
         });
 
-        const editor = new Editor({
-            view: view
+        const track = new Track({
+          view: view,
+          rotationEnabled: true
         });
-
-        const layerListExpand = new Expand({
-            expandIcon: "edit-attributes",
-            expandTooltip: "Editor",
-            view: view,
-            content: editor
-        });
+        view.ui.add(track, "top-left");
 
         view.when(() => {
-            view.ui.add(layerListExpand, "top-right");
+
+          track.start();
+
         });
-        
+
       });
-
-
-
     </script>
   </head>
 
