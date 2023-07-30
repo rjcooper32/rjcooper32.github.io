@@ -30,34 +30,58 @@
       require([
         "esri/Map",
         "esri/views/MapView",
-        "esri/widgets/Track"
-      ], (Map, MapView, Track) => {
+        "esri/Graphic",
+        "esri/layers/FeatureLayer",
+        "esri/geometry/Extent",
+        "esri/layers/support/ExtentAndRotationGeoreference",
+        "esri/layers/support/ImageElement",
+        "esri/layers/MediaLayer",
+        "esri/widgets/Locate"
+      ], (Map, MapView, Graphic, FeatureLayer, Extent, ExtentAndRotationGeoreference, ImageElement, MediaLayer, Locate) => {
+
+        const gardenLayer = new FeatureLayer({
+          url: "https://services3.arcgis.com/fquRSvLqAEnt4dIs/arcgis/rest/services/GalianoData/FeatureServer/2",
+          definitionExpression: "Class = 'Bed'"
+        });
+
+        const imageElement = new ImageElement({
+          image: "https://arcgis.github.io/arcgis-samples-javascript/sample-data/media-layer/neworleans1891.png",
+          georeference: new ExtentAndRotationGeoreference({
+            extent: new Extent({
+              spatialReference: {
+                wkid: 102100
+              },
+              xmin: 0,
+              ymin: 0,
+              xmax: 50,
+              ymax: 50
+            })
+          })
+        });
+
+        const backgroundMap = new MediaLayer({
+          source: [imageElement],
+          title: "Galiano Basemap",
+          copyright: "rjcooper32"
+        });
 
         const map = new Map({
-          basemap: "hybrid"
+          basemap: "hybrid",
+          layers: [gardenLayer, backgroundMap]
         });
 
         const view = new MapView({
           container: "viewDiv",
           map: map,
           zoom: 18,
-          center: [-123.3274, 48.8735],
-          constraints: {
-            snapToZoom: false
-          }
+          center: [-123.3274, 48.8735]
         });
 
-        const track = new Track({
-          view: view,
-          rotationEnabled: true
+        const locateWidget = new Locate({
+          view: view
         });
-        view.ui.add(track, "top-left");
 
-        view.when(() => {
-
-          track.start();
-
-        });
+        view.ui.add(locateWidget, "top-left");
 
       });
     </script>
