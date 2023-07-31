@@ -44,30 +44,143 @@
           definitionExpression: "Class = 'Bed'"
         });
 
-        const imageElement = new ImageElement({
-          image: "https://github.com/rjcooper32/rjcooper32.github.io/blob/main/GalianoTemplate.png",
-          georeference: new ExtentAndRotationGeoreference({
-            extent: new Extent({
-              spatialReference: {
-                wkid: 4326
-              },
+        const imageInfos = [
+          {
+            name: "1",
+            extent: {
               xmin: -123.3290875,
-              ymin: 48.8722437,
+              ymin: 48.87384283,
+              xmax: -123.3278718,
+              ymax: 48.8746424
+            }
+          },
+          {
+            name: "2",
+            extent: {
+              xmin: -123.3278718,
+              ymin: 48.87384283,
+              xmax: -123.3266561,
+              ymax: 48.8746424
+            }
+          },
+          {
+            name: "3",
+            extent: {
+              xmin: -123.3266561,
+              ymin: 48.87384283,
               xmax: -123.3254404,
               ymax: 48.8746424
+            }
+          },
+          {
+            name: "4",
+            extent: {
+              xmin: -123.3290875,
+              ymin: 48.87304327,
+              xmax: -123.3278718,
+              ymax: 48.87384283
+            }
+          },
+          {
+            name: "5",
+            extent: {
+              xmin: -123.3278718,
+              ymin: 48.87304327,
+              xmax: -123.3266561,
+              ymax: 48.87384283
+            }
+          },
+          {
+            name: "6",
+            extent: {
+              xmin: -123.3266561,
+              ymin: 48.87304327,
+              xmax: -123.3254404,
+              ymax: 48.87384283
+            }
+          },
+          {
+            name: "7",
+            extent: {
+              xmin: -123.3290875,
+              ymin: 48.8722437,
+              xmax: -123.3278718,
+              ymax: 48.87304327
+            }
+          },
+          {
+            name: "8",
+            extent: {
+              xmin: -123.3278718,
+              ymin: 48.8722437,
+              xmax: -123.3266561,
+              ymax: 48.87304327
+            }
+          },
+          {
+            name: "9",
+            extent: {
+              xmin: -123.3266561,
+              ymin: 48.8722437,
+              xmax: -123.3254404,
+              ymax: 48.87304327
+            }
+          }
+        ]
+
+        function createImageElement(name, box){
+          const imageElement = new ImageElement({
+            image: `./media/${name}.png`,
+            georeference: new ExtentAndRotationGeoreference({
+              extent: new Extent({
+                spatialReference: {wkid: 4326},
+                xmin: box.xmin,
+                ymin: box.ymin,
+                xmax: box.xmax,
+                ymax: box.ymax
+              })
             })
-          })
+          });
+          return imageElement
+        }
+
+        let imageElements = [];
+
+        imageInfos.forEach((image, i) => {
+          const imageElement = {
+            name: image.name,
+            title: image.name,
+            element: createImageElement(image.name, image.extent)
+          };
+          imageElements.push(imageElement);
         });
 
-        const backgroundMap = new MediaLayer({
-          source: [imageElement],
-          title: "Galiano Basemap",
-          copyright: "rjcooper32"
+        const artImage = new MediaLayer({
+          source: [
+            imageElements[0].element,
+            imageElements[1].element,
+            imageElements[2].element,
+            imageElements[3].element,
+            imageElements[4].element,
+            imageElements[5].element,
+            imageElements[6].element,
+            imageElements[7].element,
+            imageElements[8].element
+          ],
+          opacity: 0.9,
+          title: "New Orleans",
+          blendMode: "normal"
         });
+
+        // const backgroundMap = new MediaLayer({
+        //   source: [imageElement],
+        //   title: "Galiano Basemap",
+        //   copyright: "rjcooper32"
+        // });
 
         const map = new Map({
           basemap: "hybrid",
-          layers: [gardenLayer, backgroundMap]
+          layers: [gardenLayer, artImage]
         });
 
         const view = new MapView({
