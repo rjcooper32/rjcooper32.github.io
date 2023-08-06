@@ -18,12 +18,14 @@
         height: 100%;
         width: 100%;
       }
+
+      .esri-view-root {
+        background-color: #cdbeaa;
+      }
+
     </style>
 
-    <link
-      rel="stylesheet"
-      href="https://js.arcgis.com/4.26/esri/themes/light/main.css"
-    />
+    <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css"/>
     <script src="https://js.arcgis.com/4.26/"></script>
 
     <script>
@@ -32,16 +34,84 @@
         "esri/views/MapView",
         "esri/Graphic",
         "esri/layers/FeatureLayer",
+        "esri/widgets/FeatureTable",
         "esri/geometry/Extent",
         "esri/layers/support/ExtentAndRotationGeoreference",
         "esri/layers/support/ImageElement",
         "esri/layers/MediaLayer",
-        "esri/widgets/Locate"
-      ], (Map, MapView, Graphic, FeatureLayer, Extent, ExtentAndRotationGeoreference, ImageElement, MediaLayer, Locate) => {
+        "esri/widgets/Locate",
+        "esri/support/actions/ActionToggle"
+      ], (Map, MapView, Graphic, FeatureLayer, FeatureTable, Extent, ExtentAndRotationGeoreference, ImageElement, MediaLayer, Locate, ActionToggle) => {
 
+        const editAction = {
+          title: "Edit Feature",
+          id: "edit-action",
+          className: "esri-icon-edit"
+        };
+
+        const popupTemplate = {
+          title: "Garden Bed {id}",
+          //content: difficultyLevel,
+          content: [
+            {
+              type: "relationship",
+              relationshipId: 0,
+              title: "Vegetable Varities",
+              description:
+                  "Types of vegetables that have been planted in bed {ID}.",
+              displayCount: 999
+            }
+          ],
+          fieldInfos: [
+            {
+              fieldName: "class"
+            },
+            {
+              fieldName: "id"
+            }
+          ],
+          actions: [editAction]
+        };
+
+        const activiesTable = new FeatureLayer({
+          url: "https://services3.arcgis.com/fquRSvLqAEnt4dIs/arcgis/rest/services/GalianoData/FeatureServer/3",
+          popupTemplate: {
+            title: "{Variety}",
+            outFields: ["*"],
+            fieldInfos: [
+              {
+                fieldName: "Class",
+                label: "Class"
+              },
+              {
+                fieldName: "Variety",
+                label: "Variety"
+              }
+            ],
+            content: [
+              {
+                type: "fields"
+              }
+            ]
+          }
+        });
+        
         const gardenLayer = new FeatureLayer({
           url: "https://services3.arcgis.com/fquRSvLqAEnt4dIs/arcgis/rest/services/GalianoData/FeatureServer/2",
-          definitionExpression: "Class = 'Bed'"
+          definitionExpression: "Class = 'Bed'",
+          popupTemplate: popupTemplate,
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-fill",
+              color: "red",
+              outline: {
+                color: "blue",
+                width: "3px"
+              }
+            }
+
+          }
         });
 
         const imageInfos = [
@@ -155,7 +225,7 @@
           imageElements.push(imageElement);
         });
 
-        const artImage = new MediaLayer({
+        const baseImage = new MediaLayer({
           source: [
             imageElements[0].element,
             imageElements[1].element,
@@ -168,19 +238,13 @@
             imageElements[8].element
           ],
           opacity: 0.9,
-          title: "New Orleans",
+          title: "Galiano Basemap",
           blendMode: "normal"
         });
 
-        // const backgroundMap = new MediaLayer({
-        //   source: [imageElement],
-        //   title: "Galiano Basemap",
-        //   copyright: "rjcooper32"
-        // });
-
         const map = new Map({
           basemap: "hybrid",
-          layers: [gardenLayer, artImage]
+          layers: [baseImage, gardenLayer]
         });
 
         const view = new MapView({
@@ -193,8 +257,35 @@
         const locateWidget = new Locate({
           view: view
         });
-
         view.ui.add(locateWidget, "top-left");
+
+        view.when(function(){
+          map.basemap.baseLayers.getItemAt(0).opacity = 0;
+        });
+        
+        activiesTable.load().then(() => {
+          map.tables.add(activiesTable);
+        });
+
+        view.ui.add(["mapToggleButton"], "top-left");
+        var toggleButton = document.getElementById("mapToggleButton");
+        toggleButton.addEventListener("click", toggleAction);
+
+        function toggleAction(evt) {
+
+          if (map.basemap.baseLayers.getItemAt(0).opacity === 0){
+            map.basemap.baseLayers.getItemAt(0).opacity = 100;
+            console.log(map.layers)
+            baseImage.visible = false;
+            gardenLayer.opacity = 100;
+
+
+          } else {
+            map.basemap.baseLayers.getItemAt(0).opacity = 0;
+            baseImage.visible = true;
+            gardenLayer.opacity = 0;
+          }
+        }
 
       });
     </script>
@@ -202,5 +293,8 @@
 
   <body>
     <div id="viewDiv"></div>
+    <div id="mapToggleButton" class="esri-component esri-widget--button esri-widget" role="button">
+      <span title="Map Toggle" id="map-toggle" class="esri-icon esri-icon-collection"></span>
+    </div>
   </body>
 </html>
