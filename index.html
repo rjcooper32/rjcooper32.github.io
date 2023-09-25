@@ -98,6 +98,8 @@
         
         const gardenLayer = new FeatureLayer({
           url: "https://services3.arcgis.com/fquRSvLqAEnt4dIs/arcgis/rest/services/GalianoData/FeatureServer/2",
+          minScale: 5000,
+          maxScale: 0,
           definitionExpression: "Class = 'Bed'",
           popupTemplate: popupTemplate,
           renderer: {
